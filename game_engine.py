@@ -58,3 +58,9 @@ class GameEngine:
 
     def game_over(self):
         return self.check_winner() is not None or self.is_draw()
+
+    def clone(self):
+        new_game = GameEngine()
+        new_game.board = self.board.copy()
+        new_game.player = self.player
+        return new_game
