@@ -13,7 +13,11 @@ def main():
     print("\nMiniMax AI vs Random AI")
     start = time.perf_counter()
 
-    evaluate_bots(minimax_bot, random_ai, 1)
+    evaluate_bots(minimax_bot, random_ai)
+    print("\nRandom AI vs Minimax AI")
+    evaluate_bots(random_ai, minimax_bot)
+    print("\nMiniMax AI vs MiniMax AI")
+    evaluate_bots(minimax_bot, minimax_bot)
 
     end = time.perf_counter()
 
