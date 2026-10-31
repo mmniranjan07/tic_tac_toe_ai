@@ -14,11 +14,10 @@ def evaluate_state(game):
 
 cache = {}
 
-def minimax(game):
+def minimax_cache(game):
     global calls
     calls += 1
     best_score = -np.inf if game.player == "X" else np.inf
-
     state = (tuple(game.board.flatten()), game.player)
 
     if state in cache:
@@ -34,7 +33,8 @@ def minimax(game):
     for move in moves:
         game_cpy = game.clone()
         game_cpy.make_move(move[0], move[1])
-        score = minimax(game_cpy)
+        score = minimax_cache(game_cpy)
+
         if game.player == "X":
             best_score = max(best_score, score)
 
@@ -46,13 +46,39 @@ def minimax(game):
     return best_score
 
 
-def minimax_bot(game):
+def minimax_prune(game, alpha=-np.inf, beta=np.inf):
+    global calls
+    calls += 1
+
+    if game.game_over():
+        return float(evaluate_state(game))
+
+    best_score = -np.inf if game.player == "X" else np.inf
+
+    for move in game.get_legal_moves():
+        game_cpy = game.clone()
+        game_cpy.make_move(move[0], move[1])
+        score = minimax_prune(game_cpy, alpha, beta)
+
+        if game.player == "X":
+            best_score = max(best_score, score)
+            alpha = max(alpha, best_score)
+        else:
+            best_score = min(best_score, score)
+            beta = min(beta, best_score)
+
+        if alpha >= beta:
+            break
+
+    return best_score
+
+def minimax_bot(game, model):
     best_score = -np.inf if game.player == "X" else np.inf
     best_move = None
     for move in game.get_legal_moves():
         game_cpy = game.clone()
         game_cpy.make_move(move[0], move[1])
-        score = minimax(game_cpy)
+        score = model(game_cpy)
         if game.player == "X":
             if score > best_score:
                 best_score = score
@@ -62,3 +88,10 @@ def minimax_bot(game):
                 best_score = score
                 best_move = move
     return best_move
+
+def cached_bot(game):
+    return minimax_bot(game, minimax_cache)
+
+
+def pruning_bot(game):
+    return minimax_bot(game, minimax_prune)
